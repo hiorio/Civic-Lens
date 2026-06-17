@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: civic-lens-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: civic_lens
+      POSTGRES_PASSWORD: civic_lens
+      POSTGRES_DB: civic_lens
+    ports:
+      - "5432:5432"
+    volumes:
+      - civic-lens-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civic_lens -d civic_lens"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  civic-lens-postgres:

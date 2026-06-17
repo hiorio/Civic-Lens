@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.next/
+.turbo/
+.env
+.env.local
+.tools/*
+!.tools/
+!.tools/*.mjs
+!.tools/pnpm
+!.tools/pnpm.cmd
+coverage/
+*.log
+*.tsbuildinfo
+.turbo/
+review-*.png

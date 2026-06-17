@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ActivitySource {
+  NATIONAL_ASSEMBLY_API
+  MANUAL
+  SYSTEM
+}
+
+enum ActivityEventType {
+  BILL_REGISTERED
+  BILL_PRIMARY_SPONSORED
+  BILL_CO_SPONSORED
+  BILL_STATUS_CHANGED
+  BILL_REFERRED_TO_COMMITTEE
+  BILL_PASSED_PLENARY
+  BILL_DISCARDED_OR_WITHDRAWN
+  MEETING_REMARK_ADDED
+}
+
+enum FollowTargetKind {
+  MEMBER
+  BILL
+  DISTRICT
+  KEYWORD
+  COMMITTEE
+}
+
+enum BillStatus {
+  UNKNOWN
+  RECEIVED
+  REFERRED_TO_COMMITTEE
+  UNDER_COMMITTEE_REVIEW
+  PASSED_COMMITTEE
+  PASSED_PLENARY
+  PROMULGATED
+  DISCARDED
+  WITHDRAWN
+}
+
+enum BillMemberRole {
+  PRIMARY_SPONSOR
+  CO_SPONSOR
+}
+
+enum SyncStatus {
+  SUCCESS
+  FAILED
+  PARTIAL
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  follows   Follow[]
+}
+
+model Member {
+  id             String          @id @default(cuid())
+  externalId     String          @unique
+  name           String
+  partyName      String?
+  districtId     String?
+  districtName   String?
+  profileUrl     String?
+  photoUrl       String?
+  rawData        Json?
+  district       District?       @relation(fields: [districtId], references: [id])
+  billMembers    BillMember[]
+  activityEvents ActivityEvent[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([name])
+  @@index([districtId])
+}
+
+model District {
+  id        String   @id @default(cuid())
+  externalId String   @unique
+  name      String
+  region    String?
+  members   Member[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Bill {
+  id              String              @id @default(cuid())
+  externalId      String              @unique
+  billNo          String              @unique
+  title           String
+  status          BillStatus          @default(UNKNOWN)
+  proposedAt      DateTime?
+  committeeName   String?
+  detailUrl       String?
+  rawData         Json?
+  billMembers     BillMember[]
+  statusHistories BillStatusHistory[]
+  activityEvents  ActivityEvent[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([status, proposedAt])
+}
+
+model BillMember {
+  id        String         @id @default(cuid())
+  billId    String
+  memberId  String
+  role      BillMemberRole
+  bill      Bill           @relation(fields: [billId], references: [id], onDelete: Cascade)
+  member    Member         @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@unique([billId, memberId, role])
+  @@index([memberId, role])
+}
+
+model BillStatusHistory {
+  id          String     @id @default(cuid())
+  billId      String
+  fromStatus  BillStatus?
+  toStatus    BillStatus
+  source      ActivitySource
+  changedAt   DateTime
+  rawStatus   String?
+  description String?
+  rawData     Json?
+  bill        Bill       @relation(fields: [billId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+
+  @@index([billId, changedAt])
+  @@index([toStatus, changedAt])
+}
+
+model ActivityEvent {
+  id          String            @id @default(cuid())
+  type        ActivityEventType
+  source      ActivitySource
+  occurredAt  DateTime
+  collectedAt DateTime          @default(now())
+  title       String
+  summary     String?
+  url         String?
+  targetKind  FollowTargetKind
+  targetId    String
+  dedupeKey   String            @unique
+  rawData     Json?
+  billId      String?
+  memberId    String?
+  bill        Bill?             @relation(fields: [billId], references: [id])
+  member      Member?           @relation(fields: [memberId], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([targetKind, targetId, occurredAt])
+  @@index([source, type, occurredAt])
+  @@index([billId, occurredAt])
+  @@index([memberId, occurredAt])
+}
+
+model Follow {
+  id         String           @id @default(cuid())
+  userId     String
+  targetKind FollowTargetKind
+  targetId   String
+  label      String?
+  metadata   Json?
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([userId, targetKind, targetId])
+  @@index([targetKind, targetId])
+}
+
+model SyncLog {
+  id           String       @id @default(cuid())
+  source       ActivitySource
+  jobName      String
+  status       SyncStatus
+  startedAt    DateTime     @default(now())
+  finishedAt   DateTime?
+  fetchedCount Int          @default(0)
+  storedCount  Int          @default(0)
+  errorMessage String?
+  metadata     Json?
+
+  @@index([source, jobName, startedAt])
+  @@index([status, startedAt])
+}

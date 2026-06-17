@@ -1,0 +1,23 @@
+{
+  "name": "civic-lens",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build": "node .tools/run-turbo.mjs run build",
+    "build:packages": "node .tools/run-turbo.mjs run build --filter=@civic-lens/types --filter=@civic-lens/utils",
+    "dev": "node .tools/run-turbo.mjs run dev --parallel",
+    "lint": "node .tools/run-turbo.mjs run lint",
+    "typecheck": "node .tools/run-turbo.mjs run typecheck",
+    "db:check": "node .tools/check-db.mjs",
+    "db:generate": "corepack pnpm --filter @civic-lens/api prisma:generate",
+    "db:migrate": "corepack pnpm --filter @civic-lens/api prisma:migrate",
+    "db:migrate:deploy": "corepack pnpm --filter @civic-lens/api prisma:migrate:deploy",
+    "db:push": "corepack pnpm --filter @civic-lens/api prisma:push",
+    "sync:bills": "corepack pnpm --filter @civic-lens/api sync:bills",
+    "sync:members": "corepack pnpm --filter @civic-lens/api sync:members"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
+}
