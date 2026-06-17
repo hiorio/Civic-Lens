@@ -92,6 +92,13 @@ const apiBaseUrl =
 
 const mapViewport = { width: 520, height: 720 };
 
+const provinceLabelPositionOverrides: Record<
+  string,
+  { centerX: number; centerY: number }
+> = {
+  인천: { centerX: 145, centerY: 166 }
+};
+
 const provinceNameToRegionId: Record<string, string> = {
   강원도: "강원",
   경기도: "경기",
@@ -360,7 +367,7 @@ export function MapFirstHome() {
         <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
           <div className="flex max-w-3xl flex-col gap-3">
             <p className="text-sm font-semibold text-emerald-700">Civic Lens</p>
-            <h1 className="text-4xl font-semibold tracking-normal text-slate-950 md:text-6xl">
+            <h1 className="text-4xl font-semibold leading-[1.18] tracking-normal text-slate-950 md:text-6xl md:leading-[1.16]">
               내가 사는 곳의 국회 일,
               <br />
               가볍게 짚어보세요.
@@ -522,6 +529,8 @@ function KoreaRegionMap({
             }
 
             const isActive = selectedRegionId === region.id;
+            const labelPosition =
+              provinceLabelPositionOverrides[province.regionId] ?? province;
 
             return (
               <text
@@ -529,10 +538,13 @@ function KoreaRegionMap({
                 fontSize="13"
                 fontWeight="700"
                 key={`label-${province.regionId}`}
+                paintOrder="stroke"
                 pointerEvents="none"
+                stroke={isActive ? "#047857" : "#ffffff"}
+                strokeWidth="3"
                 textAnchor="middle"
-                x={province.centerX}
-                y={province.centerY}
+                x={labelPosition.centerX}
+                y={labelPosition.centerY}
               >
                 {region.shortLabel}
               </text>
@@ -895,8 +907,8 @@ function ActivityTimeline({
         >
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <span>{formatDate(activity.proposedAt)}</span>
-            <span>{roleLabel(activity.role)}</span>
-            <span>{statusLabel(activity.status)}</span>
+            <RoleBadge role={activity.role} />
+            <StatusBadge status={activity.status} />
           </div>
           <p className="mt-1 text-sm leading-5 text-slate-950">
             {member.name} 의원이{" "}
@@ -929,6 +941,29 @@ function ActivityTimeline({
         </li>
       ))}
     </ol>
+  );
+}
+
+function RoleBadge({ role }: { role: BillMemberRole }) {
+  const className =
+    role === "PRIMARY_SPONSOR"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+      : "border-indigo-200 bg-indigo-50 text-indigo-800";
+
+  return (
+    <span
+      className={`inline-flex min-h-6 items-center rounded-full border px-2 text-xs font-semibold ${className}`}
+    >
+      {roleLabel(role)}
+    </span>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  return (
+    <span className="inline-flex min-h-6 items-center rounded-full border border-slate-200 bg-white px-2 text-xs font-medium text-slate-600">
+      {statusLabel(status)}
+    </span>
   );
 }
 
