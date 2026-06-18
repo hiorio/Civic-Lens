@@ -1,5 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "../app.module";
+import { normalizeBillSyncLimit } from "../external-api/bill-sync-limits";
 import { ExternalApiService } from "../external-api/external-api.service";
 
 async function main() {
@@ -35,13 +36,8 @@ async function main() {
 function getLimit(): number {
   const limitArg = process.argv.find((arg) => arg.startsWith("--limit="));
   const rawLimit = limitArg?.split("=")[1];
-  const parsedLimit = rawLimit ? Number(rawLimit) : 100;
 
-  if (!Number.isFinite(parsedLimit) || parsedLimit < 1) {
-    return 100;
-  }
-
-  return Math.min(Math.floor(parsedLimit), 100);
+  return normalizeBillSyncLimit(rawLimit);
 }
 
 function getIncludeDetails(): boolean {

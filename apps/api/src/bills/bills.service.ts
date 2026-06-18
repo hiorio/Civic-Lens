@@ -4,6 +4,8 @@ import type { NationalAssemblyBillRow } from "@civic-lens/types";
 import { createExternalId } from "@civic-lens/utils";
 import { PrismaService } from "../prisma/prisma.service";
 
+const BILL_LIST_LIMIT = 500;
+
 @Injectable()
 export class BillsService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
@@ -11,7 +13,7 @@ export class BillsService {
   listBills() {
     return this.prisma.bill.findMany({
       orderBy: [{ proposedAt: "desc" }, { createdAt: "desc" }],
-      take: 100,
+      take: BILL_LIST_LIMIT,
       select: {
         id: true,
         externalId: true,

@@ -894,7 +894,7 @@ function DistrictActivityPanel({
       </section>
 
       <p className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-500">
-        현재 표시는 국회 API에서 수집한 최신 의안 100건 중 의원별 최대 5건의 연결 데이터 기준입니다.
+        현재 표시는 국회 API에서 수집한 최신 의안 500건 중 의원별 최대 5건의 연결 데이터 기준입니다.
       </p>
 
       <Link

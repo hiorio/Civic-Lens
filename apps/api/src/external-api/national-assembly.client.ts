@@ -9,6 +9,7 @@ import type {
 } from "@civic-lens/types";
 import { XMLParser } from "fast-xml-parser";
 import { firstValueFrom } from "rxjs";
+import { DEFAULT_BILL_SYNC_LIMIT } from "./bill-sync-limits";
 
 @Injectable()
 export class NationalAssemblyClient implements NationalAssemblyBillClient {
@@ -28,7 +29,9 @@ export class NationalAssemblyClient implements NationalAssemblyBillClient {
     private readonly configService: ConfigService
   ) {}
 
-  async fetchRecentBills(limit = 100): Promise<NationalAssemblyBillRow[]> {
+  async fetchRecentBills(
+    limit = DEFAULT_BILL_SYNC_LIMIT
+  ): Promise<NationalAssemblyBillRow[]> {
     const raw = await this.requestBillApi({
       endpoint: this.billListEndpoint,
       params: {

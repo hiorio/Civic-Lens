@@ -133,7 +133,7 @@ pnpm dev
 - `GET /v1/health/db`
   - PostgreSQL 연결 가능 여부를 확인합니다.
 - `GET /v1/bills`
-  - 최근 저장된 의안 100건을 조회합니다.
+  - 최근 저장된 의안 500건을 조회합니다.
 - `GET /v1/bills/:id`
   - 내부 `id`, `billNo`, `externalId` 중 하나로 의안을 조회합니다.
 - `GET /v1/members`
@@ -142,9 +142,10 @@ pnpm dev
   - 내부 `id`, 공식 `externalId`, 의원명 중 하나로 의원을 조회합니다.
 - `GET /v1/sync-logs`
   - 최근 외부 API 동기화 기록을 조회합니다.
-- `GET /v1/external-api/national-assembly/bills/poc?limit=100`
+- `GET /v1/external-api/national-assembly/bills/poc?limit=500`
   - 국회 의안정보 API 수집 PoC를 실행합니다.
   - 기본값으로 목록, 상세, 공동발의자 HTML 페이지를 함께 수집합니다.
+  - `limit` 기본값은 500건이며, 안전 상한은 1000건입니다.
 - `GET /v1/external-api/national-assembly/members/poc`
   - 국회의원 정보 통합 API로 22대 의원 정보를 동기화합니다.
 
@@ -174,24 +175,24 @@ pnpm dev
 `.env`에 `DATABASE_URL`과 `NATIONAL_ASSEMBLY_API_KEY`를 설정한 뒤 실행합니다.
 
 ```bash
-pnpm sync:bills -- --limit=100
+pnpm sync:bills -- --limit=500
 ```
 
 상세 조회를 생략하려면 다음 옵션을 사용합니다.
 
 ```bash
-pnpm sync:bills -- --limit=100 --skip-details
+pnpm sync:bills -- --limit=500 --skip-details
 ```
 
 공동발의자 HTML 페이지 수집을 생략하려면 다음 옵션을 사용합니다.
 
 ```bash
-pnpm sync:bills -- --limit=100 --skip-coactors
+pnpm sync:bills -- --limit=500 --skip-coactors
 ```
 
 현재 확인한 국회 API:
 
-- 목록: `https://open.assembly.go.kr/portal/openapi/nzmimeepazxkubdpn?Type=xml&pIndex=1&pSize=100&AGE=22`
+- 목록: `https://open.assembly.go.kr/portal/openapi/nzmimeepazxkubdpn?Type=xml&pIndex=1&pSize=500&AGE=22`
 - 상세: `https://open.assembly.go.kr/portal/openapi/ALLBILL?Type=xml&pIndex=1&pSize=1&AGE=22&BILL_NO={billNo}`
 - 공동발의자: 목록 응답의 `MEMBER_LIST` URL, 예: `http://likms.assembly.go.kr/bill/coactorListPopup.do?billId={billId}`
 

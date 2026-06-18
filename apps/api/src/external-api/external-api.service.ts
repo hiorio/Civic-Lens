@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { ActivitiesService } from "../activities/activities.service";
 import { MembersService } from "../members/members.service";
 import { SyncLogsService } from "../sync-logs/sync-logs.service";
+import { normalizeBillSyncLimit } from "./bill-sync-limits";
 import { NationalAssemblyClient } from "./national-assembly.client";
 
 @Injectable()
@@ -23,7 +24,7 @@ export class ExternalApiService {
     includeDetails?: boolean;
     limit?: number;
   }) {
-    const limit = input.limit ?? 100;
+    const limit = normalizeBillSyncLimit(input.limit);
     const includeCoactors = input.includeCoactors ?? true;
     const includeDetails = input.includeDetails ?? true;
     const syncLog = await this.syncLogsService.startBillSync({ limit });

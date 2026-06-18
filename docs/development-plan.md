@@ -2,7 +2,7 @@
 
 ## MVP 0: 데이터 수집 PoC
 
-- 국회 의안정보 API 최근 의안 100건 수집
+- 국회 의안정보 API 최근 의안 500건 수집
 - 목록/상세 XML 응답 파싱
 - `Bill`, `Member`, `BillMember`, `BillStatusHistory`, `ActivityEvent`, `SyncLog` 저장 검증
 - 대표발의/공동발의 관계 저장 검증

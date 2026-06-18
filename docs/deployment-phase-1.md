@@ -101,10 +101,10 @@ If Vercel cannot infer the app in the monorepo, set the project root to `apps/we
 
 ```bash
 corepack pnpm --filter @civic-lens/api sync:members
-corepack pnpm --filter @civic-lens/api sync:bills -- --limit=100
+corepack pnpm --filter @civic-lens/api sync:bills -- --limit=500
 ```
 
-For Railway, run these as one-off commands or a temporary deploy command. After the first demo is stable, replace this with a Railway cron job.
+The bill sync default is 500 rows and the current safety cap is 1000 rows. For Railway, run these as one-off commands or a temporary deploy command. After the first demo is stable, replace this with a Railway cron job.
 
 ## Future Mobile Path
 

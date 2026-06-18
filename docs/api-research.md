@@ -3,7 +3,7 @@
 ## 확인한 국회 API
 
 - 의안 목록: `nzmimeepazxkubdpn`
-  - 예: `/portal/openapi/nzmimeepazxkubdpn?Type=xml&pIndex=1&pSize=100&AGE=22`
+  - 예: `/portal/openapi/nzmimeepazxkubdpn?Type=xml&pIndex=1&pSize=500&AGE=22`
   - 주요 필드: `BILL_ID`, `BILL_NO`, `BILL_NAME`, `PROPOSER`, `PROPOSE_DT`, `COMMITTEE`, `PROC_RESULT`, `DETAIL_LINK`, `MEMBER_LIST`, `RST_PROPOSER`, `PUBL_PROPOSER`
 - 의안 상세 통합 API: `ALLBILL`
   - 예: `/portal/openapi/ALLBILL?Type=xml&pIndex=1&pSize=1&AGE=22&BILL_NO={billNo}`
@@ -18,7 +18,7 @@
 ## 구현된 PoC
 
 - XML 응답 파싱
-- 최근 의안 100건 수집
+- 최근 의안 500건 수집
 - `BILL_NO` 기반 상세 조회
 - 목록 row와 상세 row 병합
 - `Bill.rawData.list`, `Bill.rawData.detail` 원천 보존
