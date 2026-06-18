@@ -460,7 +460,7 @@ function KoreaRegionMap({
 
   return (
     <section className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
+      <div>
         <div>
           <h2 className="text-base font-semibold text-slate-950">
             1. 시·도를 고릅니다
@@ -469,9 +469,6 @@ function KoreaRegionMap({
             지도나 아래 버튼을 누르면 해당 시·도의 지역구 목록이 열립니다.
           </p>
         </div>
-        <span className="rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800">
-          경계 데이터
-        </span>
       </div>
 
       <div className="relative mt-5 overflow-hidden rounded-md border border-slate-200 bg-[#eef3f0] p-3">
@@ -578,12 +575,12 @@ function KoreaRegionMap({
 
       <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3">
         <p className="text-xs font-medium text-slate-500">
-          {activeRegion ? "선택한 지역" : "경계 데이터 기준"}
+          {activeRegion ? "선택한 지역" : "지역 선택"}
         </p>
         <p className="mt-1 text-sm font-semibold text-slate-950">
           {activeRegion
             ? `${activeRegion.label} · 지역구 ${activeRegion.districtCount}개 · 최근 의안 활동 ${activeRegion.recentPrimaryBillCount + activeRegion.recentCoSponsoredBillCount}건`
-            : "KOSTAT 2013 시·도 경계를 단순화한 GeoJSON으로 표시합니다."}
+            : "지도에서 시·도를 누르면 지역구와 의원 활동을 볼 수 있습니다."}
         </p>
       </div>
 
