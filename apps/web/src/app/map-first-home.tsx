@@ -898,9 +898,16 @@ function DistrictActivityPanel({
         현재 표시는 수집된 최근 의안 100건과 의원 동기화 데이터 기준입니다.
       </p>
 
+      <Link
+        className="mt-5 block rounded-md border border-emerald-700 bg-emerald-700 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-emerald-800"
+        href={`/members/${encodeURIComponent(member.id)}`}
+      >
+        의원 활동 자세히 보기
+      </Link>
+
       {member.profileUrl ? (
         <a
-          className="mt-5 block rounded-md border border-slate-300 px-3 py-2 text-center text-sm font-medium text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
+          className="mt-2 block rounded-md border border-slate-300 px-3 py-2 text-center text-sm font-medium text-slate-700 transition hover:border-emerald-700 hover:text-emerald-800"
           href={member.profileUrl}
           rel="noreferrer"
           target="_blank"
