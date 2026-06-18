@@ -96,7 +96,10 @@ const provinceLabelPositionOverrides: Record<
   string,
   { centerX: number; centerY: number }
 > = {
-  인천: { centerX: 145, centerY: 166 }
+  인천: { centerX: 145, centerY: 166 },
+  충북: { centerX: 286, centerY: 279 },
+  전남: { centerX: 166, centerY: 509 },
+  경북: { centerX: 395, centerY: 292 }
 };
 
 const provinceNameToRegionId: Record<string, string> = {
@@ -478,6 +481,24 @@ function KoreaRegionMap({
           viewBox={`0 0 ${mapViewport.width} ${mapViewport.height}`}
         >
           <rect fill="#eef3f0" height={mapViewport.height} rx="18" width={mapViewport.width} />
+          <defs>
+            <filter
+              colorInterpolationFilters="sRGB"
+              height="130%"
+              id="selected-region-shadow"
+              width="130%"
+              x="-15%"
+              y="-15%"
+            >
+              <feDropShadow
+                dx="0"
+                dy="5"
+                floodColor="#047857"
+                floodOpacity="0.22"
+                stdDeviation="4"
+              />
+            </filter>
+          </defs>
           {projectedProvinces.map((province) => {
             const region = regions.find((item) => item.id === province.regionId);
 
@@ -505,6 +526,7 @@ function KoreaRegionMap({
                 d={province.path}
                 fill={fill}
                 fillRule="evenodd"
+                filter={isActive ? "url(#selected-region-shadow)" : undefined}
                 key={province.regionId}
                 onClick={() => {
                   if (loadState !== "loading" && !isEmpty) {
@@ -574,7 +596,7 @@ function KoreaRegionMap({
               className={[
                 "min-h-10 rounded-md border px-2 text-sm font-medium transition",
                 isActive
-                  ? "border-emerald-700 bg-emerald-700 text-white"
+                  ? "border-emerald-700 bg-emerald-700 text-white shadow-sm ring-2 ring-emerald-100"
                   : "border-slate-200 bg-white text-slate-700 hover:border-emerald-700 hover:bg-emerald-50",
                 isEmpty ? "cursor-not-allowed opacity-45" : ""
               ].join(" ")}
@@ -759,34 +781,50 @@ function DistrictPicker({
       </dl>
 
       <div className="mt-4 max-h-[520px] space-y-2 overflow-auto pr-1">
-        {region.members.map((member) => (
-          <button
-            className={[
-              "w-full rounded-md border p-3 text-left transition",
-              selectedMemberId === member.id
-                ? "border-emerald-700 bg-emerald-50"
-                : "border-slate-200 bg-white hover:border-emerald-700 hover:bg-emerald-50"
-            ].join(" ")}
-            key={member.id}
-            onClick={() => onSelectMember(member.id)}
-            type="button"
-          >
-            <span className="block text-sm font-semibold text-slate-950">
-              {member.districtName}
-            </span>
-            <span className="mt-1 block text-sm text-slate-600">
-              {member.name} · {member.partyName ?? "정당 미확인"}
-            </span>
-            <span className="mt-2 flex flex-wrap gap-1 text-xs text-slate-500">
-              <span className="rounded border border-slate-200 px-1.5 py-0.5">
-                대표 {countBillsByRole(member, "PRIMARY_SPONSOR")}건
+        {region.members.map((member) => {
+          const hasRecentActivity = member.billMembers.length > 0;
+
+          return (
+            <button
+              className={[
+                "w-full rounded-md border p-3 text-left transition",
+                selectedMemberId === member.id
+                  ? "border-emerald-700 bg-emerald-50 shadow-sm"
+                  : "border-slate-200 bg-white hover:border-emerald-700 hover:bg-emerald-50"
+              ].join(" ")}
+              key={member.id}
+              onClick={() => onSelectMember(member.id)}
+              type="button"
+            >
+              <span className="flex items-start justify-between gap-3">
+                <span className="block text-sm font-semibold text-slate-950">
+                  {member.districtName}
+                </span>
+                <span
+                  className={[
+                    "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                    hasRecentActivity
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-slate-200 bg-slate-50 text-slate-500"
+                  ].join(" ")}
+                >
+                  {hasRecentActivity ? "활동 있음" : "수집 대기"}
+                </span>
               </span>
-              <span className="rounded border border-slate-200 px-1.5 py-0.5">
-                공동 {countBillsByRole(member, "CO_SPONSOR")}건
+              <span className="mt-1 block text-sm text-slate-600">
+                {member.name} · {member.partyName ?? "정당 미확인"}
               </span>
-            </span>
-          </button>
-        ))}
+              <span className="mt-2 flex flex-wrap gap-1 text-xs text-slate-500">
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-medium text-emerald-800">
+                  대표 {countBillsByRole(member, "PRIMARY_SPONSOR")}건
+                </span>
+                <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 font-medium text-indigo-800">
+                  공동 {countBillsByRole(member, "CO_SPONSOR")}건
+                </span>
+              </span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
@@ -899,14 +937,17 @@ function ActivityTimeline({
   member: MemberListItem;
 }) {
   return (
-    <ol className="mt-3 space-y-3">
+    <ol className="mt-3">
       {activities.slice(0, 8).map((activity) => (
         <li
-          className="border-l-2 border-slate-200 pl-3"
+          className="relative border-l-2 border-slate-200 pb-4 pl-4 last:pb-0"
           key={`${activity.billNo}-${activity.role}`}
         >
+          <span className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-600" />
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-            <span>{formatDate(activity.proposedAt)}</span>
+            <span className="inline-flex min-h-6 items-center rounded-full bg-slate-100 px-2 text-xs font-medium text-slate-600">
+              {formatDate(activity.proposedAt)}
+            </span>
             <RoleBadge role={activity.role} />
             <StatusBadge status={activity.status} />
           </div>
@@ -929,11 +970,11 @@ function ActivityTimeline({
               : "에 공동발의자로 참여했습니다."}
           </p>
           {activity.detailUrl ? (
-            <a
-              className="mt-2 inline-block text-xs font-medium text-slate-500 hover:text-emerald-800"
-              href={activity.detailUrl}
-              rel="noreferrer"
-              target="_blank"
+              <a
+                className="mt-2 inline-flex min-h-7 items-center rounded-full border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 transition hover:border-emerald-700 hover:text-emerald-800"
+                href={activity.detailUrl}
+                rel="noreferrer"
+                target="_blank"
             >
               국회 원문 보기
             </a>
