@@ -756,7 +756,7 @@ function DistrictPicker({
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-medium text-emerald-700">2. 지역구 선택</p>
@@ -778,7 +778,7 @@ function DistrictPicker({
         />
       </dl>
 
-      <div className="mt-4 max-h-[520px] min-h-0 space-y-2 overflow-auto pr-1 lg:max-h-none lg:flex-1">
+      <div className="mt-4 max-h-[560px] space-y-2 overflow-auto pr-1">
         {region.members.map((member) => {
           const hasRecentActivity = member.billMembers.length > 0;
 
