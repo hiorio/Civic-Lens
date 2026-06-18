@@ -68,6 +68,9 @@ interface MemberSummary {
 
 interface MemberListItem extends MemberSummary {
   profileUrl: string | null;
+  activityEventCount: number;
+  coSponsoredBillCount: number;
+  primaryBillCount: number;
   billMembers: Array<{
     role: BillMemberRole;
     bill: {
@@ -483,7 +486,8 @@ function MemberList({
                   {member.districtName ?? "지역구 미확인"}
                 </p>
                 <p className="mt-2 text-xs text-slate-500">
-                  최근 관련 의안 {member.billMembers.length}건
+                  연결 의안{" "}
+                  {member.primaryBillCount + member.coSponsoredBillCount}건
                 </p>
               </div>
             </div>
@@ -709,7 +713,7 @@ function MemberDetailPanel({
         <Field label="공동발의" value={`${coSponsoredBills.length}건`} />
       </dl>
 
-      <DetailSection title="최근 관련 의안">
+      <DetailSection title="관련 의안">
         {member.billMembers.length > 0 ? (
           <ul className="space-y-3">
             {member.billMembers.slice(0, 12).map((item) => (

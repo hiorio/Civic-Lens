@@ -1,5 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ActivityEventType, Member, Prisma } from "@prisma/client";
+import {
+  ActivityEventType,
+  BillMemberRole,
+  Member,
+  Prisma
+} from "@prisma/client";
 import type { NationalAssemblyMemberRow } from "@civic-lens/types";
 import {
   createActivityEventDedupeKey,
@@ -12,8 +17,8 @@ import { PrismaService } from "../prisma/prisma.service";
 export class MembersService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  listMembers() {
-    return this.prisma.member.findMany({
+  async listMembers() {
+    const members = await this.prisma.member.findMany({
       orderBy: [{ name: "asc" }],
       take: 500,
       select: {
@@ -26,7 +31,7 @@ export class MembersService {
         photoUrl: true,
         updatedAt: true,
         billMembers: {
-          take: 5,
+          take: 10,
           select: {
             role: true,
             bill: {
@@ -46,6 +51,70 @@ export class MembersService {
         }
       }
     });
+    const memberIds = members.map((member) => member.id);
+    const [billMemberCounts, activityEventCounts] = await Promise.all([
+      this.prisma.billMember.groupBy({
+        by: ["memberId", "role"],
+        where: { memberId: { in: memberIds } },
+        _count: { _all: true }
+      }),
+      this.prisma.activityEvent.groupBy({
+        by: ["memberId"],
+        where: { memberId: { in: memberIds } },
+        _count: { _all: true }
+      })
+    ]);
+    const countsByMemberId = new Map<
+      string,
+      {
+        activityEventCount: number;
+        coSponsoredBillCount: number;
+        primaryBillCount: number;
+      }
+    >();
+
+    for (const member of members) {
+      countsByMemberId.set(member.id, {
+        activityEventCount: 0,
+        coSponsoredBillCount: 0,
+        primaryBillCount: 0
+      });
+    }
+
+    for (const count of billMemberCounts) {
+      const memberCounts = countsByMemberId.get(count.memberId);
+
+      if (!memberCounts) {
+        continue;
+      }
+
+      if (count.role === BillMemberRole.PRIMARY_SPONSOR) {
+        memberCounts.primaryBillCount = count._count._all;
+      } else {
+        memberCounts.coSponsoredBillCount = count._count._all;
+      }
+    }
+
+    for (const count of activityEventCounts) {
+      if (!count.memberId) {
+        continue;
+      }
+
+      const memberCounts = countsByMemberId.get(count.memberId);
+
+      if (memberCounts) {
+        memberCounts.activityEventCount = count._count._all;
+      }
+    }
+
+    return members.map((member) => ({
+      ...member,
+      ...(countsByMemberId.get(member.id) ?? {
+        activityEventCount: 0,
+        coSponsoredBillCount: 0,
+        primaryBillCount: 0
+      })
+    }));
   }
 
   getMember(id: string) {

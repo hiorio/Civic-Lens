@@ -16,6 +16,9 @@ interface MemberListItem {
   districtName: string | null;
   profileUrl: string | null;
   photoUrl: string | null;
+  activityEventCount: number;
+  coSponsoredBillCount: number;
+  primaryBillCount: number;
   billMembers: Array<{
     role: BillMemberRole;
     bill: {
@@ -780,7 +783,7 @@ function DistrictPicker({
 
       <div className="mt-4 max-h-[600px] space-y-2 overflow-auto pr-1 lg:max-h-[720px] xl:max-h-[760px]">
         {region.members.map((member) => {
-          const hasRecentActivity = member.billMembers.length > 0;
+          const hasRecentActivity = getMemberActivityCount(member) > 0;
 
           return (
             <button
@@ -814,10 +817,10 @@ function DistrictPicker({
               </span>
               <span className="mt-2 flex flex-wrap gap-1 text-xs text-slate-500">
                 <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-medium text-emerald-800">
-                  대표 {countBillsByRole(member, "PRIMARY_SPONSOR")}건
+                  대표 {getMemberRoleCount(member, "PRIMARY_SPONSOR")}건
                 </span>
                 <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 font-medium text-indigo-800">
-                  공동 {countBillsByRole(member, "CO_SPONSOR")}건
+                  공동 {getMemberRoleCount(member, "CO_SPONSOR")}건
                 </span>
               </span>
             </button>
@@ -847,13 +850,6 @@ function DistrictActivityPanel({
     return <PanelMessage title="3. 의안 활동" text="지도에서 지역을 하나 골라보세요." />;
   }
 
-  const primaryBills = member.billMembers.filter(
-    (item) => item.role === "PRIMARY_SPONSOR"
-  );
-  const coSponsoredBills = member.billMembers.filter(
-    (item) => item.role === "CO_SPONSOR"
-  );
-
   return (
     <aside className="rounded-md border border-slate-200 bg-white p-4 shadow-sm xl:sticky xl:top-4 xl:self-start">
       <p className="text-xs font-medium text-emerald-700">3. 의안 활동</p>
@@ -876,8 +872,8 @@ function DistrictActivityPanel({
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3">
-        <Stat label="대표발의" value={`${primaryBills.length}건`} />
-        <Stat label="공동발의" value={`${coSponsoredBills.length}건`} />
+        <Stat label="대표발의" value={`${member.primaryBillCount}건`} />
+        <Stat label="공동발의" value={`${member.coSponsoredBillCount}건`} />
       </dl>
 
       <section className="mt-5 border-t border-slate-200 pt-4">
@@ -894,7 +890,7 @@ function DistrictActivityPanel({
       </section>
 
       <p className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-500">
-        현재 표시는 국회 API에서 수집한 최신 의안 500건 중 의원별 최대 5건의 연결 데이터 기준입니다.
+        현재 통계는 국회 API에서 수집한 최신 의안 500건 기준이며, 활동 목록은 의원별 최대 10건을 먼저 보여줍니다.
       </p>
 
       <Link
@@ -945,7 +941,7 @@ function ActivityTimeline({
 }) {
   return (
     <ol>
-      {activities.slice(0, 8).map((activity) => (
+      {activities.map((activity) => (
         <li
           className="relative border-l-2 border-slate-200 pb-4 pl-4 last:pb-0"
           key={`${activity.billNo}-${activity.role}`}
@@ -1018,8 +1014,14 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function countBillsByRole(member: MemberListItem, role: BillMemberRole) {
-  return member.billMembers.filter((item) => item.role === role).length;
+function getMemberRoleCount(member: MemberListItem, role: BillMemberRole) {
+  return role === "PRIMARY_SPONSOR"
+    ? member.primaryBillCount
+    : member.coSponsoredBillCount;
+}
+
+function getMemberActivityCount(member: MemberListItem) {
+  return member.primaryBillCount + member.coSponsoredBillCount;
 }
 
 function createMemberActivities(member: MemberListItem): ActivityListItem[] {
@@ -1059,13 +1061,13 @@ function createRegionSummaries(members: MemberListItem[]): RegionSummary[] {
     const recentPrimaryBillCount = regionMembers.reduce(
       (count, member) =>
         count +
-        member.billMembers.filter((item) => item.role === "PRIMARY_SPONSOR").length,
+        getMemberRoleCount(member, "PRIMARY_SPONSOR"),
       0
     );
     const recentCoSponsoredBillCount = regionMembers.reduce(
       (count, member) =>
         count +
-        member.billMembers.filter((item) => item.role === "CO_SPONSOR").length,
+        getMemberRoleCount(member, "CO_SPONSOR"),
       0
     );
 
