@@ -778,7 +778,7 @@ function DistrictPicker({
         />
       </dl>
 
-      <div className="mt-4 max-h-[600px] space-y-2 overflow-auto pr-1">
+      <div className="mt-4 max-h-[600px] space-y-2 overflow-auto pr-1 lg:max-h-[720px] xl:max-h-[760px]">
         {region.members.map((member) => {
           const hasRecentActivity = member.billMembers.length > 0;
 
