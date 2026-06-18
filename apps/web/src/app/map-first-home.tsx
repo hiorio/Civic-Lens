@@ -427,7 +427,7 @@ export function MapFirstHome() {
       </section>
 
       <section className="border-t border-slate-200 bg-slate-50 px-5 py-6">
-        <details className="mx-auto max-w-7xl rounded-md border border-slate-200 bg-white">
+        <details className="mx-auto max-w-7xl rounded-md border border-slate-200 bg-white" open>
           <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-slate-900">
             전체 의안 데이터와 수집 상태 보기
           </summary>
