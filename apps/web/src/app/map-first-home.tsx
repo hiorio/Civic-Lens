@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import provincesGeoJson from "../data/skorea-provinces.geo.json";
 import { CivicDashboard } from "./civic-dashboard";
 
@@ -953,18 +954,12 @@ function ActivityTimeline({
           </div>
           <p className="mt-1 text-sm leading-5 text-slate-950">
             {member.name} 의원이{" "}
-            {activity.detailUrl ? (
-              <a
-                className="font-medium text-emerald-800 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-950"
-                href={activity.detailUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                {activity.title}
-              </a>
-            ) : (
-              <span className="font-medium">{activity.title}</span>
-            )}
+            <Link
+              className="font-medium text-emerald-800 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-950"
+              href={`/bills/${encodeURIComponent(activity.billId)}`}
+            >
+              {activity.title}
+            </Link>
             {activity.role === "PRIMARY_SPONSOR"
               ? "을 대표발의했습니다."
               : "에 공동발의자로 참여했습니다."}
