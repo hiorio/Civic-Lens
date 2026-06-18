@@ -778,51 +778,53 @@ function DistrictPicker({
         />
       </dl>
 
-      <div className="mb-3.5 mt-4 min-h-0 flex-1 space-y-2 overflow-auto pr-1">
-        {region.members.map((member) => {
-          const hasRecentActivity = member.billMembers.length > 0;
+      <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-md border border-slate-200 bg-slate-50 p-2">
+        <div className="h-full space-y-2 overflow-y-auto pr-1">
+          {region.members.map((member) => {
+            const hasRecentActivity = member.billMembers.length > 0;
 
-          return (
-            <button
-              className={[
-                "w-full rounded-md border p-3 text-left transition",
-                selectedMemberId === member.id
-                  ? "border-emerald-700 bg-emerald-50 shadow-sm"
-                  : "border-slate-200 bg-white hover:border-emerald-700 hover:bg-emerald-50"
-              ].join(" ")}
-              key={member.id}
-              onClick={() => onSelectMember(member.id)}
-              type="button"
-            >
-              <span className="flex items-start justify-between gap-3">
-                <span className="block text-sm font-semibold text-slate-950">
-                  {member.districtName}
+            return (
+              <button
+                className={[
+                  "w-full rounded-md border p-3 text-left transition",
+                  selectedMemberId === member.id
+                    ? "border-emerald-700 bg-emerald-50 shadow-sm"
+                    : "border-slate-200 bg-white hover:border-emerald-700 hover:bg-emerald-50"
+                ].join(" ")}
+                key={member.id}
+                onClick={() => onSelectMember(member.id)}
+                type="button"
+              >
+                <span className="flex items-start justify-between gap-3">
+                  <span className="block text-sm font-semibold text-slate-950">
+                    {member.districtName}
+                  </span>
+                  <span
+                    className={[
+                      "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                      hasRecentActivity
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        : "border-slate-200 bg-slate-50 text-slate-500"
+                    ].join(" ")}
+                  >
+                    {hasRecentActivity ? "활동 있음" : "수집 대기"}
+                  </span>
                 </span>
-                <span
-                  className={[
-                    "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold",
-                    hasRecentActivity
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border-slate-200 bg-slate-50 text-slate-500"
-                  ].join(" ")}
-                >
-                  {hasRecentActivity ? "활동 있음" : "수집 대기"}
+                <span className="mt-1 block text-sm text-slate-600">
+                  {member.name} · {member.partyName ?? "정당 미확인"}
                 </span>
-              </span>
-              <span className="mt-1 block text-sm text-slate-600">
-                {member.name} · {member.partyName ?? "정당 미확인"}
-              </span>
-              <span className="mt-2 flex flex-wrap gap-1 text-xs text-slate-500">
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-medium text-emerald-800">
-                  대표 {countBillsByRole(member, "PRIMARY_SPONSOR")}건
+                <span className="mt-2 flex flex-wrap gap-1 text-xs text-slate-500">
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-medium text-emerald-800">
+                    대표 {countBillsByRole(member, "PRIMARY_SPONSOR")}건
+                  </span>
+                  <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 font-medium text-indigo-800">
+                    공동 {countBillsByRole(member, "CO_SPONSOR")}건
+                  </span>
                 </span>
-                <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 font-medium text-indigo-800">
-                  공동 {countBillsByRole(member, "CO_SPONSOR")}건
-                </span>
-              </span>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
