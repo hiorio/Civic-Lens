@@ -389,7 +389,7 @@ export function MapFirstHome() {
               2. 지역구를 선택합니다
             </li>
             <li className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-              3. 최근 의안 활동을 봅니다
+              3. 의안 활동을 봅니다
             </li>
           </ol>
         </div>
@@ -579,7 +579,7 @@ function KoreaRegionMap({
         </p>
         <p className="mt-1 text-sm font-semibold text-slate-950">
           {activeRegion
-            ? `${activeRegion.label} · 지역구 ${activeRegion.districtCount}개 · 최근 의안 활동 ${activeRegion.recentPrimaryBillCount + activeRegion.recentCoSponsoredBillCount}건`
+            ? `${activeRegion.label} · 지역구 ${activeRegion.districtCount}개 · 수집 의안 활동 ${activeRegion.recentPrimaryBillCount + activeRegion.recentCoSponsoredBillCount}건`
             : "지도에서 시·도를 누르면 지역구와 의원 활동을 볼 수 있습니다."}
         </p>
       </div>
@@ -764,7 +764,7 @@ function DistrictPicker({
             {region.label}
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            살고 있는 지역구를 누르면 오른쪽에 의원과 최근 의안 활동이 표시됩니다.
+            살고 있는 지역구를 누르면 오른쪽에 의원과 수집된 의안 활동이 표시됩니다.
           </p>
         </div>
       </div>
@@ -773,7 +773,7 @@ function DistrictPicker({
         <MiniStat label="지역구" value={`${region.districtCount}개`} />
         <MiniStat label="의원" value={`${region.memberCount}명`} />
         <MiniStat
-          label="최근 의안"
+          label="수집 의안"
           value={`${region.recentPrimaryBillCount + region.recentCoSponsoredBillCount}건`}
         />
       </dl>
@@ -840,11 +840,11 @@ function DistrictActivityPanel({
   region: RegionSummary | undefined;
 }) {
   if (loadState === "loading") {
-    return <PanelMessage title="3. 최근 활동" text="데이터를 불러오고 있습니다." />;
+    return <PanelMessage title="3. 의안 활동" text="데이터를 불러오고 있습니다." />;
   }
 
   if (!member || !region) {
-    return <PanelMessage title="3. 최근 활동" text="지도에서 지역을 하나 골라보세요." />;
+    return <PanelMessage title="3. 의안 활동" text="지도에서 지역을 하나 골라보세요." />;
   }
 
   const primaryBills = member.billMembers.filter(
@@ -856,7 +856,7 @@ function DistrictActivityPanel({
 
   return (
     <aside className="rounded-md border border-slate-200 bg-white p-4 shadow-sm xl:sticky xl:top-4 xl:self-start">
-      <p className="text-xs font-medium text-emerald-700">3. 최근 활동</p>
+      <p className="text-xs font-medium text-emerald-700">3. 의안 활동</p>
       <div className="mt-3 flex gap-3">
         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-md bg-slate-200">
           {member.photoUrl ? (
@@ -881,9 +881,11 @@ function DistrictActivityPanel({
       </dl>
 
       <section className="mt-5 border-t border-slate-200 pt-4">
-        <h3 className="text-sm font-semibold text-slate-950">최근 의안 활동</h3>
+        <h3 className="text-sm font-semibold text-slate-950">수집된 의안 활동</h3>
         {activities.length > 0 ? (
-          <ActivityTimeline activities={activities} member={member} />
+          <div className="mt-3 max-h-[360px] overflow-y-auto pr-1">
+            <ActivityTimeline activities={activities} member={member} />
+          </div>
         ) : (
           <p className="mt-3 text-sm text-slate-600">
             이번 수집 범위에서는 아직 확인된 의안 활동이 없습니다.
@@ -892,7 +894,7 @@ function DistrictActivityPanel({
       </section>
 
       <p className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-500">
-        현재 표시는 수집된 최근 의안 100건과 의원 동기화 데이터 기준입니다.
+        현재 표시는 국회 API에서 수집한 최신 의안 100건 중 의원별 최대 5건의 연결 데이터 기준입니다.
       </p>
 
       <Link
@@ -942,7 +944,7 @@ function ActivityTimeline({
   member: MemberListItem;
 }) {
   return (
-    <ol className="mt-3">
+    <ol>
       {activities.slice(0, 8).map((activity) => (
         <li
           className="relative border-l-2 border-slate-200 pb-4 pl-4 last:pb-0"
