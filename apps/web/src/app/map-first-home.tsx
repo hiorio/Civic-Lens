@@ -7,11 +7,6 @@ import { CivicDashboard } from "./civic-dashboard";
 
 type BillMemberRole = "PRIMARY_SPONSOR" | "CO_SPONSOR";
 type LoadState = "idle" | "loading" | "ready" | "error";
-type MemberDisplayStatus =
-  | "ACTIVE_INFERRED"
-  | "DISTRICT_DUPLICATE"
-  | "DISTRICT_UNKNOWN"
-  | "PROPORTIONAL";
 
 interface MemberListItem {
   id: string;
@@ -318,10 +313,6 @@ export function MapFirstHome() {
     () => createRegionSummaries(members),
     [members]
   );
-  const memberStatusById = useMemo(
-    () => createMemberStatusById(members),
-    [members]
-  );
   const selectedRegion = regionSummaries.find(
     (region) => region.id === selectedRegionId
   );
@@ -423,7 +414,6 @@ export function MapFirstHome() {
             />
             <DistrictPicker
               loadState={loadState}
-              memberStatusById={memberStatusById}
               onSelectMember={setSelectedMemberId}
               region={selectedRegion}
               selectedMemberId={selectedMember?.id ?? null}
@@ -434,11 +424,6 @@ export function MapFirstHome() {
         <DistrictActivityPanel
           activities={selectedActivities}
           loadState={loadState}
-          memberStatus={
-            selectedMember
-              ? (memberStatusById.get(selectedMember.id) ?? "DISTRICT_UNKNOWN")
-              : null
-          }
           member={selectedMember}
           region={selectedRegion}
         />
@@ -752,13 +737,11 @@ function geometryToSvgPath(
 
 function DistrictPicker({
   loadState,
-  memberStatusById,
   onSelectMember,
   region,
   selectedMemberId
 }: {
   loadState: LoadState;
-  memberStatusById: Map<string, MemberDisplayStatus>;
   onSelectMember: (memberId: string) => void;
   region: RegionSummary | undefined;
   selectedMemberId: string | null;
@@ -801,8 +784,6 @@ function DistrictPicker({
       <div className="mt-4 max-h-[600px] space-y-2 overflow-auto pr-1 lg:max-h-[720px] xl:max-h-[760px]">
         {region.members.map((member) => {
           const hasRecentActivity = getMemberActivityCount(member) > 0;
-          const memberStatus =
-            memberStatusById.get(member.id) ?? "DISTRICT_UNKNOWN";
 
           return (
             <button
@@ -820,7 +801,6 @@ function DistrictPicker({
                 <span className="block text-sm font-semibold text-slate-950">
                   {member.districtName}
                 </span>
-                <MemberStatusBadge status={memberStatus} />
               </span>
               <span className="mt-1 block text-sm text-slate-600">
                 {member.name} · {member.partyName ?? "정당 미확인"}
@@ -854,13 +834,11 @@ function DistrictPicker({
 function DistrictActivityPanel({
   activities,
   loadState,
-  memberStatus,
   member,
   region
 }: {
   activities: ActivityListItem[];
   loadState: LoadState;
-  memberStatus: MemberDisplayStatus | null;
   member: MemberListItem | null;
   region: RegionSummary | undefined;
 }) {
@@ -890,11 +868,6 @@ function DistrictActivityPanel({
           <p className="mt-1 text-sm text-slate-600">
             {member.name} · {member.partyName ?? "정당 미확인"}
           </p>
-          {memberStatus ? (
-            <div className="mt-2">
-              <MemberStatusBadge status={memberStatus} />
-            </div>
-          ) : null}
         </div>
       </div>
 
@@ -1024,23 +997,6 @@ function RoleBadge({ role }: { role: BillMemberRole }) {
   );
 }
 
-function MemberStatusBadge({ status }: { status: MemberDisplayStatus }) {
-  const className: Record<MemberDisplayStatus, string> = {
-    ACTIVE_INFERRED: "border-sky-200 bg-sky-50 text-sky-800",
-    DISTRICT_DUPLICATE: "border-amber-200 bg-amber-50 text-amber-800",
-    DISTRICT_UNKNOWN: "border-slate-200 bg-slate-50 text-slate-600",
-    PROPORTIONAL: "border-indigo-200 bg-indigo-50 text-indigo-800"
-  };
-
-  return (
-    <span
-      className={`inline-flex min-h-6 shrink-0 items-center rounded-full border px-2 text-[11px] font-semibold ${className[status]}`}
-    >
-      {memberDisplayStatusLabel(status)}
-    </span>
-  );
-}
-
 function StatusBadge({ status }: { status: string }) {
   return (
     <span className="inline-flex min-h-6 items-center rounded-full border border-slate-200 bg-white px-2 text-xs font-medium text-slate-600">
@@ -1126,43 +1082,6 @@ function createRegionSummaries(members: MemberListItem[]): RegionSummary[] {
   });
 }
 
-function createMemberStatusById(members: MemberListItem[]) {
-  const districtCounts = new Map<string, number>();
-  const statusById = new Map<string, MemberDisplayStatus>();
-
-  for (const member of members) {
-    const districtKey = getMemberDistrictKey(member.districtName);
-
-    if (districtKey) {
-      districtCounts.set(districtKey, (districtCounts.get(districtKey) ?? 0) + 1);
-    }
-  }
-
-  for (const member of members) {
-    const districtKey = getMemberDistrictKey(member.districtName);
-
-    if (member.districtName === "비례대표") {
-      statusById.set(member.id, "PROPORTIONAL");
-    } else if (!districtKey) {
-      statusById.set(member.id, "DISTRICT_UNKNOWN");
-    } else if ((districtCounts.get(districtKey) ?? 0) > 1) {
-      statusById.set(member.id, "DISTRICT_DUPLICATE");
-    } else {
-      statusById.set(member.id, "ACTIVE_INFERRED");
-    }
-  }
-
-  return statusById;
-}
-
-function getMemberDistrictKey(districtName: string | null) {
-  if (!districtName || districtName === "비례대표") {
-    return null;
-  }
-
-  return districtName.trim();
-}
-
 function getRegionId(districtName: string | null): string | null {
   if (!districtName || districtName === "비례대표") {
     return null;
@@ -1201,17 +1120,6 @@ function formatDate(value: string | null | undefined) {
 
 function roleLabel(role: BillMemberRole) {
   return role === "PRIMARY_SPONSOR" ? "대표발의" : "공동발의";
-}
-
-function memberDisplayStatusLabel(status: MemberDisplayStatus) {
-  const labels: Record<MemberDisplayStatus, string> = {
-    ACTIVE_INFERRED: "현역 추정",
-    DISTRICT_DUPLICATE: "현역 확인 필요",
-    DISTRICT_UNKNOWN: "지역구 미확인",
-    PROPORTIONAL: "비례대표"
-  };
-
-  return labels[status];
 }
 
 function statusLabel(status: string) {
