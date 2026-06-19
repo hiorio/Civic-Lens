@@ -373,7 +373,12 @@ export function MapFirstHome() {
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
           <div className="flex max-w-3xl flex-col gap-3">
-            <p className="text-sm font-semibold text-emerald-700">Civic Lens</p>
+            <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+              <span>Civic Lens</span>
+              <span aria-hidden="true" className="text-base leading-none">
+                👀
+              </span>
+            </p>
             <h1 className="text-4xl font-semibold leading-[1.18] tracking-normal text-slate-950 md:text-6xl md:leading-[1.16]">
               내가 사는 곳의 국회 일,
               <br />

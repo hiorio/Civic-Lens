@@ -78,10 +78,13 @@ export default async function BillPage({
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-col gap-5 px-5 py-6">
           <Link
-            className="w-fit text-sm font-semibold text-emerald-700 hover:text-emerald-900"
+            className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-900"
             href="/"
           >
-            Civic Lens
+            <span>Civic Lens</span>
+            <span aria-hidden="true" className="text-base leading-none">
+              👀
+            </span>
           </Link>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
